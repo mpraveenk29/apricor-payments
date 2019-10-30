@@ -1,7 +1,6 @@
-const mongoose = require('mongoose')
-const validator = require('validator')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
+const mongoose = require('mongoose');
+const validator = require('validator');
+const jwt = require('jsonwebtoken');
 
 const userSchema = mongoose.Schema({
     name: {
@@ -24,13 +23,7 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true,
         minLength: 7
-    }/*,
-    tokens: [{
-        token: {
-            type: String,
-            required: true
-        }
-    }]*/
+    }
 });
 
 
@@ -39,19 +32,19 @@ const User = mongoose.model('User', userSchema);
 
 const userRegister = (req, res, next) => {
     try {
-        const user = new User(req.body)
+        const user = new User(req.body);
         user.save(() => {
             res.status(201).send(user);
         });
     } catch (error) {
-        res.status(400).send(error)
+        res.status(400).send(error);
     }
 };
 
 const userLogin = (req, res, next) => {
     //Login a registered user
     try {
-        const { email, password } = req.body
+        const { email, password } = req.body;
         User.find({email, password}, (err, user) => {
             if (!user || user.length === 0) {
                 return res.status(401).send({error: 'Login failed! Check authentication credentials'})
@@ -59,16 +52,33 @@ const userLogin = (req, res, next) => {
                 // need to create token here
                 res.send({
                     name: user[0].name,
-                    token: user[0]._id
+                    token: jwt.sign({
+                        userId: user[0]._id
+                    }, 'apricorsecret', { expiresIn: 60 * 60 })
                 });
             }
         });
     } catch (error) {
-        res.status(400).send(error)
+        res.status(400).send(error);
+    }
+};
+
+const userAuth = (req, res, next) => {
+    try {
+        if (req.body && req.body.token) {
+            decoded = jwt.verify(token, 'apricorsecret');
+            req.body.user = decoded.userId;
+            next();
+        } else {
+            res.status(401).send('Unauthorized');
+        }
+    } catch (error) {
+        res.status(400).send(error);
     }
 };
 
 module.exports = {
     userRegister: userRegister,
-    userLogin: userLogin
+    userLogin: userLogin,
+    userAuth: userAuth
 }
