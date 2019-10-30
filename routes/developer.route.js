@@ -9,10 +9,10 @@ router.post('/user/register', userCtrlr.userRegister);
 router.post('/user/login', userCtrlr.userLogin);
 
 // Client Application Setup
-router.post('/createApplication', appCtrlr.createApplication);
-router.post('/generateKey/:applicationId', appCtrlr.generateKey);
-router.get('/applicationDetails/:applicationId', appCtrlr.applicationDetails);
-router.post('/accountSettings/:applicationId', appCtrlr.accountSettings);
+router.post('/createApplication', userCtrlr.userAuth, appCtrlr.createApplication);
+router.post('/generateKey/:applicationId', userCtrlr.userAuth, appCtrlr.generateKey);
+router.get('/applicationDetails/:applicationId', userCtrlr.userAuth, appCtrlr.applicationDetails);
+router.post('/accountSettings/:applicationId', userCtrlr.userAuth, appCtrlr.accountSettings);
 
 // Payment
 router.post('/payment/order', paymentCtrlr.paymentOrder);
